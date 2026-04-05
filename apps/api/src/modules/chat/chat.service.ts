@@ -72,16 +72,30 @@ export class ChatService {
     return message
   }
 
-  async getClaudeSessionId(roomId: string): Promise<string> {
+  async getClaudeSession(
+    roomId: string,
+  ): Promise<{ sessionId: string; isResume: boolean }> {
     const em = this.em.fork()
     const room = await em.findOne(ChatRoom, { id: roomId })
     if (!room) {
       throw new NotFoundException(`ChatRoom ${roomId} not found`)
     }
+    // Has any message been sent before? If no, create new; otherwise resume.
+    const hasMessages = await em.count(Message, { chatRoom: roomId })
     if (!room.claudeSessionId) {
       room.claudeSessionId = v4()
       await em.persistAndFlush(room)
+      return { sessionId: room.claudeSessionId, isResume: false }
     }
-    return room.claudeSessionId
+    // If claudeSessionId exists but no actual messages saved yet from AI, still first call.
+    // We track 'has AI response been saved' by checking if there's any AI message.
+    const aiMessageCount = await em.count(Message, {
+      chatRoom: roomId,
+      role: MessageRole.AI,
+    })
+    return {
+      sessionId: room.claudeSessionId,
+      isResume: aiMessageCount > 0,
+    }
   }
 }

@@ -1,5 +1,6 @@
 import { Drawer } from 'expo-router/drawer'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
+import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { StatusBar } from 'expo-status-bar'
 import { queryClient } from '../lib/queryClient'
@@ -8,8 +9,9 @@ import { theme } from '../lib/theme'
 export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <QueryClientProvider client={queryClient}>
-        <StatusBar style="light" />
+      <SafeAreaProvider>
+        <QueryClientProvider client={queryClient}>
+          <StatusBar style="light" />
         <Drawer
           screenOptions={{
             headerStyle: {
@@ -45,8 +47,9 @@ export default function RootLayout() {
             name="goals/[goalId]"
             options={{ title: '목표 상세', drawerItemStyle: { display: 'none' } }}
           />
-        </Drawer>
-      </QueryClientProvider>
+          </Drawer>
+        </QueryClientProvider>
+      </SafeAreaProvider>
     </GestureHandlerRootView>
   )
 }

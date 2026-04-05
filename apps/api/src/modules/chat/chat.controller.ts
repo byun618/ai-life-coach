@@ -63,7 +63,8 @@ export class ChatController {
       let aborted = false
       ;(async () => {
         try {
-          const sessionId = await this.chatService.getClaudeSessionId(roomId)
+          const { sessionId, isResume } =
+            await this.chatService.getClaudeSession(roomId)
           let fullText = ''
 
           subscriber.next({
@@ -74,6 +75,7 @@ export class ChatController {
           for await (const event of this.claudeCli.stream({
             prompt,
             sessionId,
+            isResume,
           })) {
             if (aborted) break
             if (event.type === 'delta') {
@@ -120,7 +122,7 @@ export class ChatController {
 
   @Post('rooms/:roomId/abort')
   async abort(@Param('roomId') roomId: string) {
-    const sessionId = await this.chatService.getClaudeSessionId(roomId)
+    const { sessionId } = await this.chatService.getClaudeSession(roomId)
     const ok = this.claudeCli.abort(sessionId)
     return { ok }
   }

@@ -9,6 +9,7 @@ import {
   TextInput,
   View,
 } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import EventSource from 'react-native-sse'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { theme } from '../lib/theme'
@@ -25,6 +26,7 @@ interface StreamingMessage {
 
 export default function ChatScreen() {
   const qc = useQueryClient()
+  const insets = useSafeAreaInsets()
   const listRef = useRef<FlatList>(null)
   const [input, setInput] = useState('')
   const [streamingMsg, setStreamingMsg] = useState<StreamingMessage | null>(null)
@@ -112,7 +114,8 @@ export default function ChatScreen() {
   return (
     <KeyboardAvoidingView
       style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : insets.top + 56}
     >
       <FlatList
         ref={listRef}
@@ -130,7 +133,7 @@ export default function ChatScreen() {
           </View>
         }
       />
-      <View style={styles.inputBar}>
+      <View style={[styles.inputBar, { paddingBottom: insets.bottom + theme.space.md }]}>
         <TextInput
           value={input}
           onChangeText={setInput}
@@ -182,7 +185,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-end',
     padding: theme.space.md,
-    paddingBottom: theme.space.xl,
     gap: theme.space.sm,
     backgroundColor: theme.color.bgBase,
   },

@@ -22,6 +22,7 @@ export type ClaudeStreamEvent = StreamDelta | StreamDone | StreamError
 interface StartStreamInput {
   prompt: string
   sessionId: string
+  isResume: boolean
   cwd?: string
 }
 
@@ -39,8 +40,11 @@ export class ClaudeCliService {
       'stream-json',
       '--verbose',
       '--include-partial-messages',
-      '--session-id',
-      input.sessionId,
+      '--model',
+      'sonnet',
+      ...(input.isResume
+        ? ['--resume', input.sessionId]
+        : ['--session-id', input.sessionId]),
       input.prompt,
     ]
 
